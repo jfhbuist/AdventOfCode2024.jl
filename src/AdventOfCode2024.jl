@@ -1,5 +1,6 @@
 module AdventOfCode2024
 
-# Write your package code here.
+    include("day_1_2022.jl")
+    export main_day_1_2022
 
 end

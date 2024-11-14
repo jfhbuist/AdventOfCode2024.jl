@@ -1,4 +1,4 @@
-# day_1.jl
+# day_1_2022.jl
 
 function sort_calories(current_cal, elf_idx, max_cal, max_idx)
     for (pos, cal) in enumerate(max_cal)
@@ -16,7 +16,7 @@ function sort_calories(current_cal, elf_idx, max_cal, max_idx)
     return max_cal, max_idx
 end
 
-function main(input, part)
+function main_day_1_2022(input, part)
     current_cal = 0
     elf_idx = 1
     max_cal = [0, 0, 0]  # first is highest
@@ -64,6 +64,6 @@ end
 #     println(main(input, part))
 # end
 
-# include("src/day_1.jl"); input = "input_test/day_1.txt"; part = 0; println(main(input, part))
+# include("src/day_1_2022.jl"); input = "input_test/day_1_2022.txt"; part = 0; println(main_day_1_2022(input, part))
 
-# input = "input_test/day_1.txt"; part = 0; println(main(input, part))
+# input = "input_test/day_1_2022.txt"; part = 0; println(main_day_1_2022(input, part))
