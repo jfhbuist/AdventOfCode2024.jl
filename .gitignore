@@ -8,3 +8,7 @@ scrap/
 input_full/*
 
 .vscode/
+
+*.DS_Store
+*~
+*.swp

@@ -3,6 +3,9 @@ uuid = "5445789b-89eb-4c83-a5a7-a5fde960a0c3"
 authors = ["Jurriaan Buist <37274013+jfhbuist@users.noreply.github.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
+
 [compat]
 julia = "1.10"
 
