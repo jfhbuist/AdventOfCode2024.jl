@@ -52,18 +52,4 @@ function main_day_1_2022(input, part)
     end
 end
 
-# if isinteractive()
-#     input = "input_test/day_1.txt"
-#     part = 0
-#     println(main(input, part))
-# end
-
-# if abspath(PROGRAM_FILE) == @__FILE__
-#     input = "input_test/day_1.txt"
-#     part = 0
-#     println(main(input, part))
-# end
-
 # include("src/day_1_2022.jl"); input = "input_test/day_1_2022.txt"; part = 0; println(main_day_1_2022(input, part))
-
-# input = "input_test/day_1_2022.txt"; part = 0; println(main_day_1_2022(input, part))

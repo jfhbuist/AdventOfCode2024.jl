@@ -10,8 +10,6 @@ function setup_day(day)
         return
     end
 
-    println("The day is ", day) 
-
     script_path = @sprintf("src/day_%d.jl",day)
     online_input_path = @sprintf("https://adventofcode.com/2022/day/%d/input",day)
     local_input_path = @sprintf("input_full/day_%d.txt",day)
@@ -30,14 +28,12 @@ function setup_day(day)
 
     # To get session cookie, go to input file in browser, and do the following:
     # right-click/inspect/network/refresh/input/cookies/session
-    # Put this string in a file called '.session_cookie', in the top directory
+    # Put this string in a file called ".session_cookie", in the top directory
     # We now read the cookie
     cookie_string = open(".session_cookie", "r") do f
         read(f, String)    
     end
     cookies_dict = Dict("session" => cookie_string)
-
-    println("The cookie is ", cookies_dict["session"])
 
     req = HTTP.get(online_input_path, cookies=cookies_dict)
 
@@ -67,16 +63,9 @@ function setup_day(day)
         write(f, "end\n") 
     end
 
+    println("Succes!")
+    return
+
 end
-
-# println("Enter day:")
-# global day = readline()
-
-# try
-#     global day = parse(Int64, day) 
-# catch e 
-#     println("ERROR: Entered day is not an integer.")
-#     return
-# end
 
 # include("setup_day.jl")
