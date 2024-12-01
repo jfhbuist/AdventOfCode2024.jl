@@ -11,7 +11,7 @@ function setup_day(day)
     end
 
     script_path = @sprintf("src/day_%d.jl",day)
-    online_input_path = @sprintf("https://adventofcode.com/2022/day/%d/input",day)
+    online_input_path = @sprintf("https://adventofcode.com/2024/day/%d/input",day)
     local_input_path = @sprintf("input_full/day_%d.txt",day)
 
     # Exit with error if preqrequisites are not met

@@ -8,3 +8,11 @@ using Test
     @test main_day_1_2022(input, 1) == test_answer_part_1
     @test main_day_1_2022(input, 2) == test_answer_part_2
 end
+
+@testset "day_1" begin
+    input = "../input_test/day_1.txt";
+    test_answer_part_1 = 11
+    test_answer_part_2 = 31
+    @test main_day_1(input, 1) == test_answer_part_1
+    @test main_day_1(input, 2) == test_answer_part_2
+end
