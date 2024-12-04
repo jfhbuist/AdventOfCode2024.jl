@@ -24,3 +24,12 @@ end
     @test main_day_2(input, 1) == test_answer_part_1
     @test main_day_2(input, 2) == test_answer_part_2
 end
+
+@testset "day_3" begin
+    input_1 = "../input_test/day_3_part_1.txt";
+    input_2 = "../input_test/day_3_part_2.txt";
+    test_answer_part_1 = 161
+    test_answer_part_2 = 48
+    @test main_day_3(input_1, 1) == test_answer_part_1
+    @test main_day_3(input_2, 2) == test_answer_part_2
+end
