@@ -12,4 +12,7 @@ module AdventOfCode2024
     include("day_3.jl")
     export main_day_3
 
+    include("day_4.jl")
+    export main_day_4
+
 end

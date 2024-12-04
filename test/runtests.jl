@@ -33,3 +33,11 @@ end
     @test main_day_3(input_1, 1) == test_answer_part_1
     @test main_day_3(input_2, 2) == test_answer_part_2
 end
+
+@testset "day_4" begin
+    input = "../input_test/day_4.txt";
+    test_answer_part_1 = 18
+    test_answer_part_2 = 9
+    @test main_day_4(input, 1) == test_answer_part_1
+    @test main_day_4(input, 2) == test_answer_part_2
+end
