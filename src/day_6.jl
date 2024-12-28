@@ -1,31 +1,40 @@
 # day_6.jl
 
-function move_guard(grid)
-    out_of_bounds = false
+function move_guard(grid, log_grid)
     dimensions = size(grid)
-    guard_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]
-    direction = grid[guard_pos]
+    orig_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]   
+    orig_direction = grid[orig_pos]
+    orig_mark = log_grid[orig_pos]
 
-    moved = false
-    while !moved 
-        trial_pos = get_trial_position(guard_pos, direction)
-        if ((trial_pos[1] < 1) || (trial_pos[1] > dimensions[1])) || ((trial_pos[2] < 1) || (trial_pos[2] > dimensions[2]))  
-            # we are out of bounds
-            # grid[guard_pos] = get_mark(grid[guard_pos], direction)
-            grid[guard_pos] = "X"
-            out_of_bounds  = true
-            break
-        elseif grid[trial_pos] == "#"
+    direction = deepcopy(orig_direction)
+    valid_direction = false
+    while !valid_direction 
+        trial_pos = get_trial_position(orig_pos, direction)
+        if !(((trial_pos[1] < 1) || (trial_pos[1] > dimensions[1])) || ((trial_pos[2] < 1) || (trial_pos[2] > dimensions[2]))) && grid[trial_pos] == "#"
             direction = get_trial_direction(direction)
-        elseif grid[trial_pos] == "." || grid[trial_pos] in ["X", "|", "-", "+"]
-            # grid[guard_pos] = get_mark(grid[guard_pos], direction)
-            grid[guard_pos] = "X"
-            guard_pos = trial_pos
-            grid[guard_pos] = direction
-            moved = true
+        else
+            valid_direction = true
         end
     end
-    return grid, out_of_bounds 
+
+    new_pos = get_trial_position(orig_pos, direction)
+    grid[orig_pos] = "X"
+    if ((new_pos[1] < 1) || (new_pos[1] > dimensions[1])) || ((new_pos[2] < 1) || (new_pos[2] > dimensions[2]))  
+        out_of_bounds  = true
+    elseif grid[new_pos] == "." || grid[new_pos] in ["X", "|", "-", "+"]
+        out_of_bounds = false
+        grid[new_pos] = direction
+    end
+
+    new_mark = get_mark(orig_mark, direction, orig_direction)
+    log_grid[orig_pos] = new_mark
+    if orig_mark in ["|", "-", "+"] && new_mark == "+"
+        circuit_found = true
+    else
+        circuit_found = false
+    end
+
+    return grid, log_grid, out_of_bounds, circuit_found
 end
 
 function get_trial_position(guard_pos, direction)
@@ -54,17 +63,57 @@ function get_trial_direction(direction)
     return direction
 end
 
-function get_mark(orig_mark, direction)
-    if direction == "^"
-        mark = "|"
-    elseif direction == ">" 
-        mark = "-"
-    elseif direction == "v"
-        mark = "|"
-    elseif direction == "<"
-        mark = "-"
+function get_mark(orig_mark, direction, orig_direction)
+    if orig_mark in ["^", ">", "v", "<"] 
+        mark = orig_mark
+    else
+        if direction == orig_direction
+            if orig_mark == "."
+                if direction == "^"
+                    mark = "|"
+                elseif direction == ">" 
+                    mark = "-"
+                elseif direction == "v"
+                    mark = "|"
+                elseif direction == "<"
+                    mark = "-"
+                end
+            elseif orig_mark == "|"
+                if direction == "^"
+                    mark = "|"
+                elseif direction == ">" 
+                    mark = "+"
+                elseif direction == "v"
+                    mark = "|"
+                elseif direction == "<"
+                    mark = "+"
+                end
+            elseif orig_mark == "-"
+                if direction == "^"
+                    mark = "+"
+                elseif direction == ">" 
+                    mark = "-"
+                elseif direction == "v"
+                    mark = "+"
+                elseif direction == "<"
+                    mark = "-"
+                end
+            elseif orig_mark == "+"
+                mark = "+"
+            end
+        elseif direction in ["^", "v"] && orig_direction in [">", "<"]  
+            mark = "+"
+        elseif direction in [">", "<"] && orig_direction in ["^", "v"]
+            mark = "+"
+        end
     end
     return mark
+end
+
+function print_grid(grid)
+    for row in 1:size(grid)[1]
+        println(join(grid[row,:]))
+    end
 end
 
 function main_day_6(input, part)
@@ -72,18 +121,24 @@ function main_day_6(input, part)
     lines = readlines(input)
     split_lines = [split(line,"") for line in lines]
     grid =  permutedims(hcat(split_lines...))
+    log_grid = deepcopy(grid)
+    circuit_count = 0
     
     out_of_bounds = false
     while !out_of_bounds 
-        grid, out_of_bounds = move_guard(grid)
+        grid, log_grid, out_of_bounds, circuit_found = move_guard(grid, log_grid)
+        if circuit_found
+            circuit_count += 1
+        end
     end
-    visited_position_count = length(findall(x->x in ["X", "|", "-", "+"], grid))
+    # visited_position_count = length(findall(x->x == "X", grid))
+    visited_position_count = length(findall(x->x in ["|", "-", "+", "^", ">", "v", "<"], log_grid))
 
+    # print_grid(log_grid)
     if part == 1
         return visited_position_count
-        # return grid
     elseif part == 2
-        return 0
+        return circuit_count
     end
 end
 
