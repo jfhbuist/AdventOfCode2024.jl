@@ -74,3 +74,5 @@ end
 
 # include("src/day_5.jl"); input = "input_test/day_5.txt"; part = 2; main_day_5(input, part)
 # include("src/day_5.jl"); input = "input_full/day_5.txt"; part = 2; main_day_5(input, part)
+
+input = "input_full/day_5.txt"; part = 1; main_day_5(input, part)

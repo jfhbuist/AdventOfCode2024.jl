@@ -53,12 +53,15 @@ function setup_day(day)
     open(script_path, "w") do f
         write(f, @sprintf("# day_%d.jl\n\n",day)) 
         write(f, @sprintf("function main_day_%d(input, part)\n\n",day)) 
+        write(f, "    text = read(input, String)\n")
+        write(f, "    lines = readlines(input)\n\n")
         write(f, "    if part == 1\n")
         write(f, "        return 0\n")
         write(f, "    elseif part == 2\n")
         write(f, "        return 0\n")
         write(f, "    end\n")
-        write(f, "end\n") 
+        write(f, "end\n\n") 
+        write(f, @sprintf("input = \"input_test/day_%d.txt\"; part = 1; main_day_%d(input, part)\n",day,day)) 
     end
 
     println("Succes!")
@@ -66,4 +69,4 @@ function setup_day(day)
 
 end
 
-# include("setup_day.jl")
+# include("setup_day.jl"); setup_day(x)
