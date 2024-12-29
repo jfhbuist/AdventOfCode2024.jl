@@ -70,9 +70,22 @@ end
 function place_obstacle(grid, log_grid)
     dimensions = size(grid)
     orig_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]   
-    direction = grid[orig_pos]
+    orig_direction = grid[orig_pos]
+    orig_mark = log_grid[orig_pos]
 
-    new_pos = get_trial_position(orig_pos, direction)
+    direction = deepcopy(orig_direction)
+    trial_pos = deepcopy(orig_pos)
+    valid_direction = false
+    while !valid_direction 
+        trial_pos = get_trial_position(orig_pos, direction)
+        if !(((trial_pos[1] < 1) || (trial_pos[1] > dimensions[1])) || ((trial_pos[2] < 1) || (trial_pos[2] > dimensions[2]))) && grid[trial_pos] in ["#", "O"]
+            direction = get_trial_direction(direction)
+        else
+            valid_direction = true
+        end
+    end
+
+    new_pos = trial_pos
     placed_obstacle = false
     if ((new_pos[1] < 1) || (new_pos[1] > dimensions[1])) || ((new_pos[2] < 1) || (new_pos[2] > dimensions[2]))  
         # do nothing
@@ -130,7 +143,6 @@ function show_all_obstacles(grid, obstacle_list)
     return grid
 end
 
-
 function main_day_6(input, part)
 
     lines = readlines(input)
@@ -180,19 +192,19 @@ function main_day_6(input, part)
     end
 end
 
-# input = "input_test/day_6.txt"; part = 2; main_day_6(input, part)
-input = "input_full/day_6.txt"; part = 0; log_grid_list, obstacle_list, visited_position_count, circuit_count = main_day_6(input, part)
+# input = "input_full/day_6.txt"; part = 0; log_grid_list, obstacle_list, visited_position_count, circuit_count = main_day_6(input, part)
+input = "input_test/day_6.txt"; part = 0; log_grid_list, obstacle_list, visited_position_count, circuit_count = main_day_6(input, part)
+# input = "input_test/day_6_b.txt"; part = 0; log_grid_list, obstacle_list, visited_position_count, circuit_count = main_day_6(input, part)
 
-# input = "input_test/day_6.txt"; part = 0; log_grid_list, obstacle_list, visited_position_count, circuit_count = main_day_6(input, part)
-lines = readlines(input)
-split_lines = [split(line,"") for line in lines]
-grid = permutedims(hcat(split_lines...))
-init_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]  
-init_direction = grid[init_pos]
+# lines = readlines(input)
+# split_lines = [split(line,"") for line in lines]
+# grid = permutedims(hcat(split_lines...))
+# init_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]  
+# init_direction = grid[init_pos]
 # for grid in log_grid_list
 #     print_log_grid(grid, init_pos, init_direction)
 #     println()
 # end
-println(visited_position_count, " ", circuit_count)
+# println(visited_position_count, " ", circuit_count)
 
-print_grid(show_all_obstacles(grid, obstacle_list))
+# print_grid(show_all_obstacles(grid, obstacle_list))
