@@ -1,7 +1,5 @@
 # day_6.jl
 
-global direction_to_mark = Dict("^" => "|", "v" => "|", ">" => "-", "<" => "-",)
-
 function move_guard(grid, log_grid)
     dimensions = size(grid)
     orig_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]   
@@ -31,15 +29,15 @@ function move_guard(grid, log_grid)
     end
 
     # println(orig_mark)
-    new_mark = get_mark(orig_mark, direction, orig_direction)
-    log_grid[orig_pos] = new_mark
-    # if orig_mark in ["|", "-", "+"] && new_mark == "+"
-    if orig_mark == direction_to_mark[direction]
+    if direction in orig_mark
         circuit_found = true
         # println(orig_mark, direction)
     else
         circuit_found = false
     end
+    push!(log_grid[orig_pos], orig_direction)
+    push!(log_grid[orig_pos], direction)
+    unique!(log_grid[orig_pos])
 
     return grid, log_grid, out_of_bounds, circuit_found, turned
 end
@@ -70,68 +68,22 @@ function get_trial_direction(direction)
     return direction
 end
 
-function get_mark(orig_mark, direction, orig_direction)
-    if orig_mark in ["^", ">", "v", "<"] 
-        mark = orig_mark
-    else
-        if (direction in ["^", "v"] && orig_direction in ["^", "v"]) || (direction in [">", "<"] && orig_direction in [">", "<"])
-            if orig_mark == "."
-                if direction == "^"
-                    mark = "|"
-                elseif direction == ">" 
-                    mark = "-"
-                elseif direction == "v"
-                    mark = "|"
-                elseif direction == "<"
-                    mark = "-"
-                end
-            elseif orig_mark == "|"
-                if direction == "^"
-                    mark = "|"
-                elseif direction == ">" 
-                    mark = "+"
-                elseif direction == "v"
-                    mark = "|"
-                elseif direction == "<"
-                    mark = "+"
-                end
-            elseif orig_mark == "-"
-                if direction == "^"
-                    mark = "+"
-                elseif direction == ">" 
-                    mark = "-"
-                elseif direction == "v"
-                    mark = "+"
-                elseif direction == "<"
-                    mark = "-"
-                end
-            elseif orig_mark == "+"
-                mark = "+"
-            end
-        elseif direction in ["^", "v"] && orig_direction in [">", "<"]  
-            mark = "+"
-        elseif direction in [">", "<"] && orig_direction in ["^", "v"]
-            mark = "+"
-        end
-    end
-    return mark
-end
-
 function place_obstacle(grid, log_grid)
     dimensions = size(grid)
     orig_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]   
     direction = grid[orig_pos]
 
     new_pos = get_trial_position(orig_pos, direction)
-    # out_of_bounds = false
+    placed_obstacle = false
     if ((new_pos[1] < 1) || (new_pos[1] > dimensions[1])) || ((new_pos[2] < 1) || (new_pos[2] > dimensions[2]))  
-        # out_of_bounds  = true
-    elseif grid[new_pos] == "." || grid[new_pos] in ["X", "|", "-", "+"]
+        # do nothing
+    elseif grid[new_pos] == "." || grid[new_pos] == "X"
         grid[new_pos] = "O"
-        log_grid[new_pos] = "O"
+        push!(log_grid[new_pos], "O")
+        placed_obstacle = true
     end 
 
-    return grid, log_grid
+    return grid, log_grid, placed_obstacle
 end
 
 function print_grid(grid)
@@ -140,12 +92,42 @@ function print_grid(grid)
     end
 end
 
+function print_log_grid(log_grid, init_pos, init_direction)
+    direction_to_mark = Dict("." => ".", "#" => "#", "O" => "O", "^" => "|", "v" => "|", ">" => "-", "<" => "-")
+    for row in 1:size(log_grid)[1]
+        row_string = ""
+        for col in 1:size(log_grid)[2]
+            if CartesianIndex(row, col) == init_pos
+                elm = init_direction
+            else
+                elm_list = log_grid[row, col]
+                mark_list = unique([direction_to_mark[x] for x in elm_list])
+                if length(mark_list) == 1
+                    elm = mark_list[1]
+                else
+                    filter!(x -> x != ".", mark_list)
+                    if length(mark_list) == 1
+                        elm = mark_list[1]
+                    elseif any(x-> x == "|", mark_list) && any(x-> x == "-", mark_list)
+                        elm = "+"
+                    end
+                end
+            end
+            row_string = string(row_string, elm)
+        end
+        println(row_string)
+    end
+end
+
 function main_day_6(input, part)
 
     lines = readlines(input)
     split_lines = [split(line,"") for line in lines]
     grid =  permutedims(hcat(split_lines...))
-    log_grid = deepcopy(grid)
+    init_pos = findall(x->(x=="^" || x==">" || x=="v" || x=="<"),grid)[1]  
+    init_direction = grid[init_pos]
+    tried_pos = Vector{CartesianIndex{2}}([init_pos])
+    log_grid = [Vector{String}([x]) for x in grid]
     circuit_count = 0
     
     out_of_bounds = false
@@ -154,22 +136,32 @@ function main_day_6(input, part)
         test_out_of_bounds = false
         test_grid = deepcopy(grid)
         test_log_grid = deepcopy(log_grid)
-        test_grid, test_log_grid = place_obstacle(test_grid, test_log_grid)
-        while !test_out_of_bounds
-            test_grid, test_log_grid, test_out_of_bounds, circuit_found = move_guard(test_grid, test_log_grid)
-            if !test_out_of_bounds && circuit_found
-                circuit_count += 1
-                print_grid(test_log_grid)
-                println(circuit_count)
-                break
+        test_grid, test_log_grid, placed_obstacle = place_obstacle(test_grid, test_log_grid)
+        # print_grid(test_grid)
+        # println(placed_obstacle)
+        if placed_obstacle
+            obstacle_pos = findall(x->x=="O", test_grid)[1]  
+            if !(obstacle_pos in tried_pos) 
+                while !test_out_of_bounds
+                    test_grid, test_log_grid, test_out_of_bounds, circuit_found = move_guard(test_grid, test_log_grid)
+                    if !test_out_of_bounds && circuit_found
+                        circuit_count += 1
+                        print_log_grid(test_log_grid, init_pos, init_direction)
+                        println(circuit_count)
+                        break
+                    end
+                end
+            push!(tried_pos, obstacle_pos)
             end
         end
         grid, log_grid, out_of_bounds = move_guard(grid, log_grid)
     end
-    # visited_position_count = length(findall(x->x == "X", grid))
-    visited_position_count = length(findall(x->x in ["|", "-", "+", "^", ">", "v", "<"], log_grid))
+    visited_position_count = length(findall(x->x == "X", grid))
 
-    # print_grid(log_grid)
+    # print_grid(grid)
+
+    println(visited_position_count)
+    println(circuit_count)
     if part == 1
         return visited_position_count
     elseif part == 2
@@ -177,4 +169,4 @@ function main_day_6(input, part)
     end
 end
 
-input = "input_test/day_6.txt"; part = 1; main_day_6(input, part)
+input = "input_test/day_6.txt"; part = 2; main_day_6(input, part)
